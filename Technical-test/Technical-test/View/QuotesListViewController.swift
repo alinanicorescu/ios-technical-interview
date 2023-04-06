@@ -36,6 +36,9 @@ class QuotesListViewController: UIViewController {
     
     private func fetchData() {
         DataManager().fetchQuotes(completionHandler: handleQuotesResult)
+        //In this implementation, for each fetch data the favorites will be reset to false
+        //If we want to keep the favorite values they need to be synched from one request to another based on the unique id of a quote,e.g the name of the quote
+        //Also favorites should be persisted on a file on appWillTerminate and retrieved on appDidFinishLaunching
     }
     
     private func handleQuotesResult(quotes: [Quote]?, error: Error?) {
