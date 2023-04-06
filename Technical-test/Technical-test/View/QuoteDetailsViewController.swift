@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol QuoteDetailsViewControllerDelegate: class {
+    func didChangeFavorite()
+}
+
 class QuoteDetailsViewController: UIViewController {
     
     private var quote:Quote? = nil
@@ -18,8 +22,7 @@ class QuoteDetailsViewController: UIViewController {
     let readableLastChangePercentLabel = UILabel()
     let favoriteButton = UIButton()
     
-    
-    
+    weak var delegate: QuoteDetailsViewControllerDelegate?
     
     init(quote:Quote) {
         super.init(nibName: nil, bundle: nil)
@@ -65,7 +68,7 @@ class QuoteDetailsViewController: UIViewController {
         readableLastChangePercentLabel.layer.borderColor = UIColor.black.cgColor
         readableLastChangePercentLabel.font = .systemFont(ofSize: 30)
         
-        favoriteButton.setTitle("Add to favorites", for: .normal)
+        setFavoriteButtonTitle()
         favoriteButton.layer.cornerRadius = 6
         favoriteButton.layer.masksToBounds = true
         favoriteButton.layer.borderWidth = 3
@@ -82,6 +85,13 @@ class QuoteDetailsViewController: UIViewController {
         view.addSubview(favoriteButton)
     }
     
+    private func setFavoriteButtonTitle() {
+        if let favorite = quote?.favorite, favorite {
+            favoriteButton.setTitle("Remove from favorites", for: .normal)
+        } else {
+            favoriteButton.setTitle("Add to favorites", for: .normal)
+        }
+    }
     
     func setupAutolayout() {
         symbolLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -91,44 +101,49 @@ class QuoteDetailsViewController: UIViewController {
         readableLastChangePercentLabel.translatesAutoresizingMaskIntoConstraints = false
         favoriteButton.translatesAutoresizingMaskIntoConstraints = false
         
-        let safeArea = view.safeAreaLayoutGuide
-        
-        NSLayoutConstraint.activate([
-            symbolLabel.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 30),
-            symbolLabel.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 10),
-            symbolLabel.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -10),
-            symbolLabel.heightAnchor.constraint(equalToConstant: 44),
-            
-            nameLabel.topAnchor.constraint(equalTo: symbolLabel.bottomAnchor, constant: 10),
-            nameLabel.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 10),
-            nameLabel.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -10),
-            nameLabel.heightAnchor.constraint(equalToConstant: 44),
-            
-            lastLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 10),
-            lastLabel.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 10),
-            lastLabel.widthAnchor.constraint(equalToConstant: 150),
-            lastLabel.heightAnchor.constraint(equalToConstant: 44),
-            
-            currencyLabel.topAnchor.constraint(equalTo: lastLabel.topAnchor),
-            currencyLabel.leadingAnchor.constraint(equalTo: lastLabel.trailingAnchor, constant: 5),
-            currencyLabel.widthAnchor.constraint(equalToConstant: 50 ),
-            currencyLabel.heightAnchor.constraint(equalToConstant: 44),
-            
-            readableLastChangePercentLabel.topAnchor.constraint(equalTo: lastLabel.topAnchor),
-            readableLastChangePercentLabel.leadingAnchor.constraint(equalTo: currencyLabel.trailingAnchor, constant: 5),
-            readableLastChangePercentLabel.widthAnchor.constraint(equalToConstant: 150),
-            readableLastChangePercentLabel.bottomAnchor.constraint(equalTo: lastLabel.bottomAnchor),
-                        
-            favoriteButton.topAnchor.constraint(equalTo: readableLastChangePercentLabel.bottomAnchor, constant: 30),
-            favoriteButton.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor),
-            favoriteButton.widthAnchor.constraint(equalToConstant: 150),
-            favoriteButton.heightAnchor.constraint(equalToConstant: 44),
-            
-        ])
+        if #available(iOS 11.0, *) {
+            let safeArea = view.safeAreaLayoutGuide
+            NSLayoutConstraint.activate([
+                    symbolLabel.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 30),
+                    symbolLabel.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 10),
+                    symbolLabel.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -10),
+                    symbolLabel.heightAnchor.constraint(equalToConstant: 44),
+                    
+                    nameLabel.topAnchor.constraint(equalTo: symbolLabel.bottomAnchor, constant: 10),
+                    nameLabel.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 10),
+                    nameLabel.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -10),
+                    nameLabel.heightAnchor.constraint(equalToConstant: 44),
+                    
+                    lastLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 10),
+                    lastLabel.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 10),
+                    lastLabel.widthAnchor.constraint(equalToConstant: 150),
+                    lastLabel.heightAnchor.constraint(equalToConstant: 44),
+                    
+                    currencyLabel.topAnchor.constraint(equalTo: lastLabel.topAnchor),
+                    currencyLabel.leadingAnchor.constraint(equalTo: lastLabel.trailingAnchor, constant: 5),
+                    currencyLabel.widthAnchor.constraint(equalToConstant: 50 ),
+                    currencyLabel.heightAnchor.constraint(equalToConstant: 44),
+                    
+                    readableLastChangePercentLabel.topAnchor.constraint(equalTo: lastLabel.topAnchor),
+                    readableLastChangePercentLabel.leadingAnchor.constraint(equalTo: currencyLabel.trailingAnchor, constant: 5),
+                    readableLastChangePercentLabel.widthAnchor.constraint(equalToConstant: 150),
+                    readableLastChangePercentLabel.bottomAnchor.constraint(equalTo: lastLabel.bottomAnchor),
+                                
+                    favoriteButton.topAnchor.constraint(equalTo: readableLastChangePercentLabel.bottomAnchor, constant: 30),
+                    favoriteButton.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor),
+                    favoriteButton.widthAnchor.constraint(equalToConstant: 200),
+                    favoriteButton.heightAnchor.constraint(equalToConstant: 44),
+                    
+                ])
+        } else {
+            // Fallback on earlier versions
+        }
     }
     
-    
     @objc func didPressFavoriteButton(_ sender:UIButton!) {
-        // TODO
+        guard let favorite = quote?.favorite else { return }
+        self.quote?.favorite = !favorite
+        setFavoriteButtonTitle()
+        self.delegate?.didChangeFavorite()
     }
 }
